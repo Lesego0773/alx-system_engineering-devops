@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Displays the shell PID
 
-# Display the PID of the current script
-echo "PID of this script is: $$"
+echo $$
 
