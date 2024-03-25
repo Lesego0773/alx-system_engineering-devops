@@ -1,0 +1,32 @@
+##Web Infrastructure Design##
+
+Explanation:
+
+Additional Elements:
+
+Load Balancer: Added to distribute incoming traffic across multiple servers for improved performance and reliability.
+Additional Server: Separating the web server, application server, and database server allows for better scalability, fault tolerance, and performance optimization.
+Load Balancer Configuration:
+
+Distribution Algorithm: HAProxy can be configured with various algorithms like Round Robin or Least Connections. For this setup, let's use the Round Robin algorithm, which distributes requests equally among the available servers.
+Active-Active vs. Active-Passive:
+
+Active-Active Setup: Both servers are actively handling requests simultaneously, providing redundancy and load distribution. In this setup, both the web server and the application server can process requests concurrently.
+Active-Passive Setup: One server remains active and serves requests, while the other server acts as a standby or backup. If the active server fails, the passive server takes over to ensure continuous service availability.
+Database Primary-Replica Cluster:
+
+In a Primary-Replica (Master-Slave) cluster, the Primary node handles write operations (inserts, updates, deletes), while the Replica node(s) replicate data from the Primary and handle read operations.
+The Primary node serves as the authoritative source for data modifications, while the Replica node(s) provide read scalability and redundancy.
+Difference between Primary and Replica Nodes:
+
+Primary Node: Handles write operations, ensuring data consistency and integrity. It's responsible for processing incoming data modifications and serving as the primary source of truth for the application.
+Replica Node: Replicates data from the Primary node and handles read operations. It provides redundancy, scalability, and improved read performance for the application.
+Issues with this Infrastructure:
+
+Single Points of Failure (SPOF):
+The web server, application server, and database server each represent potential SPOFs if any one of them fails.
+Security Issues:
+Lack of firewall: Without proper firewall configuration, the servers are vulnerable to unauthorized access and potential security breaches.
+No HTTPS: Transmitting sensitive data over HTTP exposes it to interception and manipulation by malicious actors.
+No Monitoring:
+Without monitoring tools in place, it's challenging to detect and address performance issues, security threats, and system failures proactively.
