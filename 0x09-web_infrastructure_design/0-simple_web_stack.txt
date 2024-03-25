@@ -1,37 +1,40 @@
 ##Web Infrastructure Design##
 
+
+Basic Explanation :
+
+Server (8.8.8.8):
+
+This is a physical or virtual machine responsible for hosting all components of the web infrastructure.
+Web Server (Nginx):
+
+Nginx acts as the front-facing server, receiving and responding to HTTP requests from users' browsers.
+It handles tasks such as serving static files, managing SSL certificates, and routing requests to the appropriate backend servers.
+Application Server:
+
+This server executes the application logic and generates dynamic content based on user requests.
+It communicates with the web server to process HTTP requests and responses.
+Application Files (Your Code Base):
+
+These are the files comprising the website's application logic, such as HTML, CSS, JavaScript, and server-side code (e.g., PHP, Python, Node.js).
+Database (MySQL):
+
+MySQL is used to store and manage the website's data, such as user accounts, content, and configurations.
+The application server interacts with the database to perform CRUD operations (Create, Read, Update, Delete) as required by the application.
 Explanation:
 
-Additional Elements:
-
-Load Balancer: Added to distribute incoming traffic across multiple servers for improved performance and reliability.
-Additional Server: Separating the web server, application server, and database server allows for better scalability, fault tolerance, and performance optimization.
-Load Balancer Configuration:
-
-Distribution Algorithm: HAProxy can be configured with various algorithms like Round Robin or Least Connections. For this setup, let's use the Round Robin algorithm, which distributes requests equally among the available servers.
-Active-Active vs. Active-Passive:
-
-Active-Active Setup: Both servers are actively handling requests simultaneously, providing redundancy and load distribution. In this setup, both the web server and the application server can process requests concurrently.
-Active-Passive Setup: One server remains active and serves requests, while the other server acts as a standby or backup. If the active server fails, the passive server takes over to ensure continuous service availability.
-Database Primary-Replica Cluster:
-
-In a Primary-Replica (Master-Slave) cluster, the Primary node handles write operations (inserts, updates, deletes), while the Replica node(s) replicate data from the Primary and handle read operations.
-The Primary node serves as the authoritative source for data modifications, while the Replica node(s) provide read scalability and redundancy.
-Difference between Primary and Replica Nodes:
-
-Primary Node: Handles write operations, ensuring data consistency and integrity. It's responsible for processing incoming data modifications and serving as the primary source of truth for the application.
-Replica Node: Replicates data from the Primary node and handles read operations. It provides redundancy, scalability, and improved read performance for the application.
+Server: A server is a computer system that provides services or resources to other computers, known as clients, over a network.
+Domain Name: A domain name is a human-readable label that maps to a specific IP address, allowing users to access resources on the internet more easily. It serves as the address for your website.
+www DNS Record: The "www" in www.foobar.com is a subdomain, and in DNS, it's typically an alias (CNAME) record pointing to the main domain (foobar.com).
+Web Server: The web server handles incoming HTTP requests from clients, serving static content and routing dynamic requests to the application server.
+Application Server: The application server executes the application's business logic, generating dynamic content based on user input or requests.
+Database: The database stores and manages structured data used by the application, providing persistent storage for information such as user profiles, posts, and settings.
+Communication with User's Computer: The server communicates with the user's computer over the internet using the HTTP protocol, responding to requests for web pages and resources.
 Issues with this Infrastructure:
 
-Single Points of Failure (SPOF):
-The web server, application server, and database server each represent potential SPOFs if any one of them fails.
-Security Issues:
-Lack of firewall: Without proper firewall configuration, the servers are vulnerable to unauthorized access and potential security breaches.
-No HTTPS: Transmitting sensitive data over HTTP exposes it to interception and manipulation by malicious actors.
-No Monitoring:
-Without monitoring tools in place, it's challenging to detect and address performance issues, security threats, and system failures proactively.
-
-
+Single Point of Failure (SPOF): Since all components are hosted on a single server, any failure in hardware or software could lead to downtime for the entire website.
+Downtime during Maintenance: Performing maintenance tasks such as deploying new code or updating software may require restarting the web server, resulting in temporary downtime for users.
+Limited Scalability: If the website experiences a sudden surge in traffic, a single server may not be able to handle the increased load efficiently, leading to performance issues or downtime.
 
 
 
