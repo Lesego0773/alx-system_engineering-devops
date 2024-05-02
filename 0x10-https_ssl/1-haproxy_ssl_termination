@@ -1,51 +1,50 @@
 global
-        log /dev/log    local0
-        log /dev/log    local1 notice
-        chroot /var/lib/haproxy
-        stats socket /run/haproxy/admin.sock mode 660 level admin
-        stats timeout 30s
-        user haproxy
-        group haproxy
-        daemon
-        
-        # New commands
-        maxconn 2048
-        tune.ssl.default-dh-param 2048
-
-        # Default SSL material locations
-        ca-base /etc/ssl/certs
-        crt-base /etc/ssl/private
-
-        # See: https://ssl-config.mozilla.org/#server=haproxy&server-version=2.0.3&config=intermediate
-        ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-        ssl-default-bind-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
-        ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+    # Set SSL engine to use
+    ssl-default-bind-ciphers AES128+EECDH:AES128+EDH
 
 defaults
-        log     global
-        mode    http
-        option  httplog
-        option  dontlognull
-        timeout connect 5000
-        timeout client  50000
-        timeout server  50000
-        
-	# New commands
-        option forwardfor
-        option http-server-close
+    # Log format
+    log global
+    option httplog
+    option dontlognull
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
 
-frontend besthor_front_end
+frontend http_front
     bind *:80
-    bind *:443 ssl crt /etc/haproxy/certs/www.besthor.tech.pem
+    bind *:443 ssl crt /etc/letsencrypt/live/www.example.com/fullchain.pem
+
+    # Redirect HTTP to HTTPS
     http-request redirect scheme https unless { ssl_fc }
-    http-request set-header X-Forwarded-Proto https
-    default_backend besthor_back_end
 
-backend besthor_back_end
-    balance roundrobin
-    
-    server 176572-web-01 54.165.168.252:80 check
-    server 176572-web-02 54.236.45.234:80  check
+    default_backend http_back
 
-backend letsencrypt-backend
-    server letsencrypt 127.0.0.1:54321
+backend http_back
+    server web_server1 127.0.0.1:80
+
+frontend https_front
+    bind *:443 ssl crt /etc/letsencrypt/live/kabelomakokga@gmail.com/fullchain.pem
+
+    acl is_root path -i /
+    http-request set-var(req.holberton) str(Holberton School) if is_root
+
+    http-response set-header X-Served-By 03-web-01
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection 1;mode=block
+
+    use_backend http_back if is_root
+
+backend http_back
+    server web_server1 127.0.0.1:80
+
+    http-response set-header Content-Security-Policy "default-src 'self'"
+    http-response set-header Referrer-Policy "no-referrer"
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection 1;mode=block
+
+    http-response set-header X-Served-By 03-web-01
+
