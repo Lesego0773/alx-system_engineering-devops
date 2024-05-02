@@ -1,50 +1,40 @@
 global
-    # Set SSL engine to use
-    ssl-default-bind-ciphers AES128+EECDH:AES128+EDH
+    log     /dev/log local0
+    maxconn 2048
+    user    haproxy
+    group   haproxy
+    tune.ssl.default-dh-param 2048
 
 defaults
-    # Log format
-    log global
-    option httplog
-    option dontlognull
-    timeout connect 5000ms
-    timeout client  50000ms
-    timeout server  50000ms
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+    option  redispatch
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+    option  forwardfor
+    option  http-server-close
 
-frontend http_front
-    bind *:80
-    bind *:443 ssl crt /etc/letsencrypt/live/www.example.com/fullchain.pem
+frontend www-http
+    bind   0.0.0.0:80
+    reqadd X-Forwarded-Proto:\ http
+    default_backend www-backend
 
-    # Redirect HTTP to HTTPS
-    http-request redirect scheme https unless { ssl_fc }
+frontend www-https
+    bind   0.0.0.0:443 ssl crt /etc/haproxy/certs/www.bdbnb.site.pem
+    reqadd X-Forwarded-Proto:\ https
+    acl    letsencrypt-acl path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt-backend if letsencrypt-acl
+    default_backend www-backend
 
-    default_backend http_back
+backend www-backend
+    balance  roundrobin
+    redirect scheme https if !{ ssl_fc }
+    server 375-web-01 104.196.168.90:80 check
+    server 375-web-02 35.196.46.172:80 check
 
-backend http_back
-    server web_server1 127.0.0.1:80
-
-frontend https_front
-    bind *:443 ssl crt /etc/letsencrypt/live/kabelomakokga@gmail.com/fullchain.pem
-
-    acl is_root path -i /
-    http-request set-var(req.holberton) str(Holberton School) if is_root
-
-    http-response set-header X-Served-By 03-web-01
-    http-response set-header X-Frame-Options DENY
-    http-response set-header X-Content-Type-Options nosniff
-    http-response set-header X-XSS-Protection 1;mode=block
-
-    use_backend http_back if is_root
-
-backend http_back
-    server web_server1 127.0.0.1:80
-
-    http-response set-header Content-Security-Policy "default-src 'self'"
-    http-response set-header Referrer-Policy "no-referrer"
-    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    http-response set-header X-Frame-Options DENY
-    http-response set-header X-Content-Type-Options nosniff
-    http-response set-header X-XSS-Protection 1;mode=block
-
-    http-response set-header X-Served-By 03-web-01
-
+backend letsencrypt-backend
+    server letsencrypt 127.0.0.1:54321
