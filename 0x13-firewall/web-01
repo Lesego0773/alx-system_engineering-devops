@@ -1,2 +1,2 @@
 #!/usr/bin
-ssh -i ubuntu@serverIpAddress
+ssh -i ubuntu@208.67.222.222
