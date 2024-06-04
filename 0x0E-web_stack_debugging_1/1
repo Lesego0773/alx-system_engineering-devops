@@ -1,4 +1,2 @@
-sudo: unable to resolve host c7ce09455eca: Name or service not known
-sed: can't read /etc/nginx/nginx.conf: No such file or directory
-sudo: unable to resolve host c7ce09455eca: Name or service not known
-nginx: unrecognized service
+ * Restarting nginx nginx
+   ...done.
